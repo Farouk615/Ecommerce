@@ -1,0 +1,70 @@
+<?php
+
+namespace App\Entity;
+
+use App\Repository\CartRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity(repositoryClass: CartRepository::class)]
+class Cart
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'carts')]
+    private Collection $products;
+
+    #[ORM\OneToOne(inversedBy: 'cart', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $_user = null;
+
+    public function __construct()
+    {
+        $this->products = new ArrayCollection();
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return Collection<int, Product>
+     */
+    public function getProducts(): Collection
+    {
+        return $this->products;
+    }
+
+    public function addProduct(Product $product): static
+    {
+        if (!$this->products->contains($product)) {
+            $this->products->add($product);
+        }
+
+        return $this;
+    }
+
+    public function removeProduct(Product $product): static
+    {
+        $this->products->removeElement($product);
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->_user;
+    }
+
+    public function setUser(User $_user): static
+    {
+        $this->_user = $_user;
+
+        return $this;
+    }
+}
